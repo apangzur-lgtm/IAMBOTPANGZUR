@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IAMBOTPANGZUR | eFootball 2026 Tournament</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-black: #050505;
+            --goku-purple: #A020F0;
+            --neon-pink: #FF00FF;
+            --dark-surface: #121212;
+            --text-gray: #b0b0b0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-black);
+            color: #ffffff;
+            font-family: 'Rajdhani', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: radial-gradient(circle at center, #1a052a 0%, #050505 100%);
+            padding: 20px;
+            border-bottom: 3px solid var(--goku-purple);
+        }
+
+        .hero h1 { font-size: 3rem; color: var(--neon-pink); text-shadow: 0 0 20px var(--neon-pink); margin-bottom: 10px; }
+        .hero p { font-size: 1.4rem; color: var(--text-gray); margin-bottom: 30px; }
+
+        /* --- BUTTONS --- */
+        .btn {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--goku-purple), var(--neon-pink));
+            color: white;
+            padding: 18px 40px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            box-shadow: 0 0 15px var(--goku-purple);
+            transition: 0.3s ease;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .btn:hover { transform: scale(1.05); box-shadow: 0 0 30px var(--neon-pink); }
+
+        /* --- SECTIONS --- */
+        section { padding: 60px 20px; max-width: 800px; margin: 0 auto; }
+
+        .card {
+            background: var(--dark-surface);
+            border: 1px solid #333;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--goku-purple);
+        }
+
+        /* --- TOURNAMENT DETAILS --- */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .grid-item { background: #1a1a1a; padding: 15px; border-radius: 8px; text-align: center; }
+        .grid-item span { display: block; color: var(--neon-pink); font-size: 1.5rem; font-weight: bold; }
+
+        /* --- FORM --- */
+        form { display: flex; flex-direction: column; gap: 15px; }
+        label { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; color: var(--goku-purple); }
+        input, select {
+            width: 100%; padding: 15px; background: #0a0a0a; border: 1px solid #333;
+            color: white; border-radius: 5px; font-size: 1rem;
+        }
+        input:focus { border-color: var(--neon-pink); outline: none; }
+
+        /* --- FLOATING CONTACT --- */
+        .wa-float {
+            position: fixed; bottom: 20px; right: 20px;
+            background: #25D366; color: white; border-radius: 50px;
+            padding: 15px 20px; font-weight: bold; text-decoration: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); z-index: 100;
+        }
+
+        /* --- MOBILE OPTIMIZATION --- */
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2rem; }
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        <h1>IAMBOTPANGZUR</h1>
+        <p>EFOOTBALL 2026 MOBILE TOURNAMENT</p>
+        <a href="#register" class="btn">REGISTER NOW</a>
+    </div>
+
+    <section id="details">
+        <h2 style="text-align: center; margin-bottom: 30px;">Tournament Info</h2>
+        <div class="grid">
+            <div class="grid-item"><h3>Entry Fee</h3><span>500 NGN</span></div>
+            <div class="grid-item"><h3>Slots</h3><span>16 Players</span></div>
+            <div class="grid-item"><h3>Platform</h3><span>Mobile Only</span></div>
+            <div class="grid-item"><h3>Format</h3><span>Dream Team</span></div>
+        </div>
+        
+        <div class="card" style="margin-top: 30px; border-left-color: gold;">
+            <h3 style="color: gold;">PAYMENT DETAILS</h3>
+            <p>Pay 500 NGN to the following account:</p>
+            <p><strong>Bank:</strong> OPay</p>
+            <p><strong>Account Number:</strong> 09112382903</p>
+            <p><strong>Name:</strong> [Admin Name]</p>
+        </div>
+    </section>
+
+    <section id="rules">
+        <div class="card">
+            <h2>Match Rules</h2>
+            <ul style="margin-top: 15px; padding-left: 20px;">
+                <li>10-minute Dream Team format.</li>
+                <li>Division 1 Standards expected.</li>
+                <li>Zero-tolerance for lag/cheating.</li>
+                <li>No rage quitting.</li>
+                <li>If the game disconnects within the first 10 mins, it will be replayed.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="register">
+        <h2 style="margin-bottom: 20px; color: var(--neon-pink);">Official Registration</h2>
+        <div class="card">
+            <form action="https://formsubmit.co/apangzur@gmail.com" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="_subject" value="New Tournament Registration!">
+                <input type="hidden" name="_next" value="https://chat.whatsapp.com/KIHvl9EO9yUIyeJkcSKfgd">
+
+                <label>PLAYER FULL NAME</label>
+                <input type="text" name="Name" placeholder="Your Gaming Name" required>
+
+                <label>WHATSAPP NUMBER</label>
+                <input type="tel" name="Phone" placeholder="09112382903" required>
+
+                <label>EFOOTBALL GAME ID</label>
+                <input type="text" name="GameID" placeholder="123-456-789" required>
+
+                <label>SQUAD SCREENSHOT (EVIDENCE)</label>
+                <input type="file" name="SquadShot" accept="image/*" required>
+
+                <p style="font-size: 0.8rem; color: #888; margin-top: 10px;">*After clicking submit, you will be redirected to the WhatsApp Group. Registration is PENDING until payment is verified by Admin.</p>
+                
+                <button type="submit" class="btn" style="margin-top: 10px;">SUBMIT & JOIN GROUP</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="comments">
+        <h2 style="margin-bottom: 15px;">Trash Talk / Comments</h2>
+        <div class="card">
+            <p style="color: #666;">Comment section powered by community. Be respectful.</p>
+            <div style="border: 1px dashed #444; height: 100px; display: flex; align-items: center; justify-content: center; margin-top: 15px;">
+                [Comments Loading...]
+            </div>
+        </div>
+    </section>
+
+    <footer style="text-align: center; padding: 40px; background: #000; border-top: 1px solid #222;">
+        <h3>IAMBOT</h3>
+        <p style="margin: 15px 0;">
+            <a href="https://tiktok.com/@IAMBOT" style="color: var(--neon-pink); text-decoration: none;">TikTok</a> | 
+            <a href="https://instagram.com/IAMBOT" style="color: var(--neon-pink); text-decoration: none;">Instagram</a>
+        </p>
+        <p style="color: #444; font-size: 0.8rem;">© 2026 IAMBOTPANGZUR. All Rights Reserved.</p>
+    </footer>
+
+    <a href="https://wa.me/2349112382903" class="wa-float" target="_blank">
+        DM ADMIN
+    </a>
+
+</body>
+</html>
