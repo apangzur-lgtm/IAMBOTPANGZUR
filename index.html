@@ -193,3 +193,34 @@
 
 </body>
 </html>
+<section id="admin-portal" class="py-20 border-t border-goku-purple/30 bg-black">
+    <div class="max-w-4xl mx-auto px-4">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="h-1 w-12 bg-goku-purple"></div>
+            <h2 class="font-orbitron text-3xl font-black uppercase tracking-tighter">Admin <span class="text-goku-pink">Terminal</span></h2>
+        </div>
+
+        <div class="bg-goku-dark border border-goku-purple/40 p-6 neon-border">
+            <form id="articleForm" class="space-y-4">
+                <input type="text" id="artTitle" placeholder="Article Title (e.g., Meta Tactics for May)" required 
+                    class="w-full bg-black border border-goku-purple/50 p-3 text-white focus:border-goku-pink outline-none font-orbitron">
+                
+                <textarea id="artContent" rows="4" placeholder="Write your content here..." required 
+                    class="w-full bg-black border border-goku-purple/50 p-3 text-white focus:border-goku-pink outline-none font-rajdhani"></textarea>
+                
+                <button type="submit" class="neon-btn w-full py-3 font-orbitron font-bold uppercase tracking-widest text-white">
+                    Publish to Feed
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section id="news-feed" class="py-20 bg-grid">
+    <div class="max-w-4xl mx-auto px-4">
+        <h2 class="font-orbitron text-2xl font-bold mb-10 text-gray-500 uppercase tracking-widest">>> Intel Feed</h2>
+        <div id="articlesContainer" class="space-y-8">
+            <div class="text-gray-600 font-mono animate-pulse">Waiting for admin input...</div>
+        </div>
+    </div>
+</section>
