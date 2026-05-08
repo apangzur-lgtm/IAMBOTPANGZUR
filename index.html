@@ -1,26 +1,22 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IAMBOTPANGZUR HUB | eFootball Intelligence</title>
+    <title>IAMBOTPANGZUR HUB</title>
     
     <!-- React & Dependencies -->
-    <script src="[https://unpkg.com/react@18/umd/react.production.min.js](https://unpkg.com/react@18/umd/react.production.min.js)"></script>
-    <script src="[https://unpkg.com/react-dom@18/umd/react-dom.production.min.js](https://unpkg.com/react-dom@18/umd/react-dom.production.min.js)"></script>
-    <script src="[https://unpkg.com/@babel/standalone/babel.min.js](https://unpkg.com/@babel/standalone/babel.min.js)"></script>
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-    <script src="[https://unpkg.com/lucide@latest](https://unpkg.com/lucide@latest)"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-    <link href="[https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@400;600;700&display=swap](https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@400;600;700&display=swap)" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
-        body {
-            background-color: #050505;
-            color: #ffffff;
-            font-family: 'Rajdhani', sans-serif;
-            margin: 0;
-        }
+        body { background-color: #050505; color: #ffffff; font-family: 'Rajdhani', sans-serif; margin: 0; }
         .font-orbitron { font-family: 'Orbitron', sans-serif; }
         .bg-grid {
             background-size: 30px 30px;
@@ -38,11 +34,8 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
-        const { 
-            Gamepad2, UserCircle, TrendingUp, ChevronRight, 
-            MessageSquare, Settings, Video 
-        } = lucide;
+        const { useState } = React;
+        const { Gamepad2, UserCircle, TrendingUp, ChevronRight, MessageSquare, Settings, Video } = lucide;
 
         function App() {
             const [view, setView] = useState('feed');
@@ -55,27 +48,15 @@
                     id: 1,
                     title: "The 'Goku Black' 4-2-2-2 Meta Guide",
                     type: "Tactics",
-                    media: "[https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800](https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800)",
+                    media: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800",
                     content: "This formation focuses on high-pressure counter attacks. Use two AMFs with high passing stats to exploit the gaps between the opponent's midfield and defense.",
                     date: "May 8, 2026"
-                },
-                {
-                    id: 2,
-                    title: "Best Free Agents to Sign This Week",
-                    type: "Review",
-                    media: "[https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800](https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800)",
-                    content: "Don't sleep on the new J-League POTW cards. Their balance and tight possession make them perfect for laggy matches.",
-                    date: "May 7, 2026"
                 }
             ];
 
             const handleLogin = () => {
-                if(adminPass === 'GOKU_BLACK_2026') {
-                    setIsAdmin(true);
-                    setView('admin');
-                } else {
-                    alert("ACCESS DENIED");
-                }
+                if(adminPass === 'GOKU_BLACK_2026') { setIsAdmin(true); setView('admin'); }
+                else { alert("ACCESS DENIED"); }
             };
 
             return (
@@ -87,104 +68,62 @@
                         </div>
                         <div className="flex items-center gap-5">
                             <button onClick={() => setView('feed')} className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-pink-500">Intel</button>
-                            {isAdmin ? (
-                                <button onClick={() => setView('admin')} className="text-xs font-bold text-purple-400">Dashboard</button>
-                            ) : (
-                                <button onClick={() => setView('login')} className="text-gray-400 hover:text-white"><UserCircle size={22} /></button>
-                            )}
+                            <button onClick={() => setView('login')} className="text-gray-400 hover:text-white"><UserCircle size={22} /></button>
                         </div>
                     </nav>
 
-                    <main className="pt-24 pb-12 px-4 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-                        {/* Center Feed */}
-                        <div className="lg:col-span-8 space-y-8">
-                            {view === 'feed' && (
-                                <>
-                                    <div className="h-24 w-full glass-panel rounded-xl flex items-center justify-center border-dashed border-purple-500/20">
-                                        <span className="text-[10px] uppercase tracking-[0.4em] text-gray-600">Premium Ad Space</span>
-                                    </div>
-
+                    <main className="pt-24 pb-12 px-4 max-w-6xl mx-auto">
+                        {view === 'feed' && (
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                                <div className="lg:col-span-8 space-y-8">
                                     <h2 className="text-xs font-black uppercase tracking-[0.3em] text-white border-l-4 border-pink-500 pl-4">Latest Transmissions</h2>
-                                    
                                     {posts.map(post => (
                                         <div key={post.id} className="glass-panel rounded-2xl overflow-hidden cursor-pointer hover:border-purple-500/50 transition-all group" onClick={() => { setSelectedPost(post); setView('article'); }}>
                                             <div className="h-48 overflow-hidden bg-black">
-                                                <img src={post.media} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700" />
+                                                <img src={post.media} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all" />
                                             </div>
                                             <div className="p-6">
                                                 <span className="text-[10px] text-pink-500 font-bold uppercase tracking-widest">{post.type}</span>
                                                 <h3 className="text-2xl font-bold uppercase mt-1 group-hover:text-purple-400">{post.title}</h3>
-                                                <p className="text-gray-400 text-sm mt-2 line-clamp-2">{post.content}</p>
+                                                <p className="text-gray-400 text-sm mt-2">{post.content}</p>
                                             </div>
                                         </div>
                                     ))}
-                                </>
-                            )}
-
-                            {view === 'article' && selectedPost && (
-                                <div className="space-y-6 animate-in fade-in duration-500">
-                                    <button onClick={() => setView('feed')} className="text-xs font-bold text-purple-400 flex items-center gap-1 uppercase tracking-widest">
-                                        <ChevronRight size={14} className="rotate-180" /> Back to Feed
-                                    </button>
-                                    <h1 className="text-4xl font-black uppercase leading-tight">{selectedPost.title}</h1>
-                                    <div className="flex gap-4 text-[10px] text-gray-500 font-bold uppercase tracking-widest border-y border-white/5 py-4">
-                                        <span>BY IAMBOTPANGZUR</span>
-                                        <span>•</span>
-                                        <span>{selectedPost.date}</span>
-                                    </div>
-                                    <img src={selectedPost.media} className="w-full rounded-2xl border border-white/10" />
-                                    <p className="text-gray-300 text-lg leading-relaxed whitespace-pre-wrap">{selectedPost.content}</p>
-                                    <div className="pt-10 border-t border-white/5">
-                                        <h4 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest mb-4"><MessageSquare size={16} className="text-pink-500" /> Intelligence Discussion</h4>
-                                        <div className="bg-black/40 p-6 rounded-xl text-center border border-white/5">
-                                            <p className="text-xs text-gray-600 uppercase tracking-widest italic">Communication channel restricted to verified users</p>
-                                        </div>
-                                    </div>
                                 </div>
-                            )}
-
-                            {view === 'login' && (
-                                <div className="max-w-sm mx-auto pt-20 flex flex-col items-center">
-                                    <h2 className="font-orbitron text-xl font-bold mb-6">ADMIN AUTH</h2>
-                                    <input 
-                                        type="password" 
-                                        className="w-full bg-black border border-purple-500/30 rounded-xl px-4 py-3 text-center tracking-widest mb-4 outline-none focus:border-pink-500"
-                                        placeholder="••••••••"
-                                        value={adminPass}
-                                        onChange={(e) => setAdminPass(e.target.value)}
-                                    />
-                                    <button onClick={handleLogin} className="w-full bg-purple-600 py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-pink-600 transition-colors">Verify Key</button>
-                                </div>
-                            )}
-
-                            {view === 'admin' && (
-                                <div className="space-y-6">
-                                    <h2 className="text-2xl font-black uppercase flex items-center gap-2"><Settings className="text-purple-500" /> Command Center</h2>
-                                    <div className="glass-panel p-6 rounded-2xl space-y-4">
-                                        <h3 className="text-sm font-bold uppercase text-pink-500 tracking-widest">Deploy New Transmission</h3>
-                                        <input className="w-full bg-black border border-white/10 rounded-lg p-3 text-sm" placeholder="Post Title" />
-                                        <textarea className="w-full bg-black border border-white/10 rounded-lg p-3 text-sm h-32" placeholder="Intel Content"></textarea>
-                                        <button className="bg-purple-600 w-full py-3 rounded-xl font-bold uppercase tracking-widest">Publish</button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Sidebar */}
-                        <aside className="lg:col-span-4 space-y-6">
-                            <div className="glass-panel p-5 rounded-2xl">
-                                <h3 className="text-[10px] font-black uppercase text-purple-500 tracking-widest mb-4 flex items-center gap-2"><TrendingUp size={14} /> Global Meta</h3>
-                                <ul className="space-y-4 text-sm text-gray-400">
-                                    <li className="hover:text-pink-500 cursor-pointer transition-colors">How to counter 'Long Ball Counter'</li>
-                                    <li className="hover:text-pink-500 cursor-pointer transition-colors">Mastering the Controlled Shot</li>
-                                    <li className="hover:text-pink-500 cursor-pointer transition-colors">Hidden Gems: J-League Update</li>
-                                </ul>
+                                <aside className="lg:col-span-4 glass-panel p-5 rounded-2xl h-fit">
+                                    <h3 className="text-[10px] font-black uppercase text-purple-500 tracking-widest mb-4 flex items-center gap-2"><TrendingUp size={14} /> Global Meta</h3>
+                                    <ul className="space-y-4 text-sm text-gray-400">
+                                        <li className="hover:text-pink-500 cursor-pointer">Best Skill Builds v3.4</li>
+                                        <li className="hover:text-pink-500 cursor-pointer">Defensive AI Nerf</li>
+                                    </ul>
+                                </aside>
                             </div>
-                            <div className="glass-panel h-64 rounded-2xl flex flex-col items-center justify-center p-6 text-center">
-                                <Video size={30} className="text-gray-800 mb-2" />
-                                <span className="text-[10px] text-gray-700 font-bold uppercase tracking-widest">Video Slot Sidebar</span>
+                        )}
+
+                        {view === 'article' && selectedPost && (
+                            <div className="max-w-3xl mx-auto space-y-6">
+                                <button onClick={() => setView('feed')} className="text-xs font-bold text-purple-400 flex items-center gap-1 uppercase tracking-widest">
+                                    <ChevronRight size={14} className="rotate-180" /> Back
+                                </button>
+                                <h1 className="text-4xl font-black uppercase leading-tight">{selectedPost.title}</h1>
+                                <img src={selectedPost.media} className="w-full rounded-2xl border border-white/10" />
+                                <p className="text-gray-300 text-lg leading-relaxed">{selectedPost.content}</p>
                             </div>
-                        </aside>
+                        )}
+
+                        {view === 'login' && (
+                            <div className="max-w-sm mx-auto pt-20 flex flex-col items-center">
+                                <h2 className="font-orbitron text-xl font-bold mb-6 text-white uppercase tracking-widest text-center">Admin Access Restricted</h2>
+                                <input 
+                                    type="password" 
+                                    className="w-full bg-black border border-purple-500/30 rounded-xl px-4 py-3 text-center tracking-widest mb-4 outline-none focus:border-pink-500 text-white"
+                                    placeholder="••••••••"
+                                    value={adminPass}
+                                    onChange={(e) => setAdminPass(e.target.value)}
+                                />
+                                <button onClick={handleLogin} className="w-full bg-purple-600 py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-pink-600 transition-colors">Verify</button>
+                            </div>
+                        )}
                     </main>
                 </div>
             );
@@ -195,3 +134,6 @@
     </script>
 </body>
 </html>
+
+```
+
