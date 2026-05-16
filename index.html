@@ -1,253 +1,267 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IAMBOTPANGZUR HUB | eFootball Intelligence</title>
-    
-    <!-- Core Dependencies -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- Firebase (Compat Version for ease of use in single HTML) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
-
-    <style>
-        body { 
-            background-color: #050505; 
-            color: #ffffff; 
-            font-family: 'Rajdhani', sans-serif; 
-            margin: 0;
-            overflow-x: hidden;
-        }
-        .font-orbitron { font-family: 'Orbitron', sans-serif; }
-        .bg-grid {
-            background-size: 30px 30px;
-            background-image: linear-gradient(to right, rgba(184, 41, 234, 0.05) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(184, 41, 234, 0.05) 1px, transparent 1px);
-        }
-        .glass-panel {
-            background: rgba(10, 10, 10, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(184, 41, 234, 0.1);
-        }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #050505; }
-        ::-webkit-scrollbar-thumb { background: #b829ea; border-radius: 10px; }
-    </style>
+    <title>IAMBOT HUB | eFootball Tournament Platform</title>
+    <!-- Google Fonts for Esports Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-grid">
-    <div id="root"></div>
+<body>
 
-    <script type="text/babel">
-        // Initialize Firebase
-        const firebaseConfig = JSON.parse(__firebase_config);
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'iambotpangzur-hub';
+    <!-- Loading Animation Screen -->
+    <div id="loader">
+        <div class="loader-content">
+            <h1 class="neon-text-pink">IAMBOT HUB</h1>
+            <div class="loading-bar"></div>
+        </div>
+    </div>
 
-        const { useState, useEffect } = React;
-
-        // Custom Icon Component
-        const Icon = ({ name, size = 20, className = "" }) => {
-            const LucideIcon = lucide[name] || lucide.Gamepad2;
-            return <LucideIcon size={size} className={className} />;
-        };
-
-        const AdSlot = ({ id, ads, className }) => {
-            const ad = ads?.[id] || { 
-                banner: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800', 
-                link: '#' 
-            };
-            return (
-                <div className={`overflow-hidden rounded-xl border border-purple-500/20 bg-black/40 group relative ${className}`}>
-                    <a href={ad.link} target="_blank" className="block w-full h-full">
-                        <img src={ad.banner} className="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-all duration-500" />
-                        <div className="absolute top-2 right-2 bg-black/80 px-2 py-0.5 text-[8px] text-purple-400 border border-purple-500/30 uppercase tracking-widest">Ad</div>
-                    </a>
-                </div>
-            );
-        };
-
-        const FormationGrid = ({ players }) => (
-            <div className="relative w-full aspect-[4/5] bg-[#0a1a0a] border-2 border-white/5 rounded-2xl overflow-hidden shadow-inner">
-                <div className="absolute inset-0 border-b border-white/5" style={{ top: '50%' }}></div>
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-16 border-b border-x border-white/5"></div>
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-16 border-t border-x border-white/5"></div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 border border-white/5 rounded-full"></div>
-                {players?.map((p, i) => (
-                    <div key={i} className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group" style={{ left: `${p.x}%`, top: `${p.y}%` }}>
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-700 to-pink-600 border border-white/20 flex items-center justify-center text-[10px] font-bold shadow-[0_0_15px_rgba(184,41,234,0.5)]">
-                            {p.pos}
-                        </div>
-                        <span className="text-[10px] mt-1 text-white bg-black/80 px-2 py-0.5 rounded-full border border-purple-500/20 whitespace-nowrap">{p.name}</span>
-                    </div>
-                ))}
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">IAMBOT <span class="neon-text-purple">HUB</span></a>
+            <ul class="nav-menu" id="nav-menu">
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#register" class="nav-link">Register</a></li>
+                <li><a href="#players" class="nav-link">Players</a></li>
+                <li><a href="#media" class="nav-link">Media & Tables</a></li>
+                <li><a href="#community" class="nav-link">Community</a></li>
+                <li><button id="admin-login-btn" class="btn btn-outline"><i class="fa-solid fa-lock"></i> Admin</button></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
             </div>
-        );
+        </div>
+    </nav>
 
-        function App() {
-            const [user, setUser] = useState(null);
-            const [view, setView] = useState('feed');
-            const [posts, setPosts] = useState([]);
-            const [ads, setAds] = useState({});
-            const [selectedPost, setSelectedPost] = useState(null);
-            const [isAdmin, setIsAdmin] = useState(false);
-            const [adminPass, setAdminPass] = useState('');
-            const [newPost, setNewPost] = useState({ title: '', content: '', mediaUrl: '', type: 'Tactics', players: [] });
-            const [tempPos, setTempPos] = useState({ x: 50, y: 50, pos: 'CF', name: '' });
-
-            useEffect(() => {
-                const initAuth = async () => {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await auth.signInWithCustomToken(__initial_auth_token);
-                    } else {
-                        await auth.signInAnonymously();
-                    }
-                };
-                initAuth();
-                return auth.onAuthStateChanged(setUser);
-            }, []);
-
-            useEffect(() => {
-                if (!user) return;
-                const unsubPosts = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('posts')
-                    .orderBy('createdAt', 'desc')
-                    .onSnapshot(snap => setPosts(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
-                
-                const unsubAds = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('config').doc('ads')
-                    .onSnapshot(snap => { if(snap.exists()) setAds(snap.data()); });
-
-                return () => { unsubPosts(); unsubAds(); };
-            }, [user]);
-
-            const publishPost = async () => {
-                await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('posts').add({
-                    ...newPost,
-                    createdAt: Date.now(),
-                    author: 'IAMBOTPANGZUR'
-                });
-                setNewPost({ title: '', content: '', mediaUrl: '', type: 'Tactics', players: [] });
-                setView('feed');
-            };
-
-            const login = () => {
-                if (adminPass === 'GOKU_BLACK_2026') { setIsAdmin(true); setView('admin'); }
-                else { alert("ACCESS DENIED"); }
-            };
-
-            return (
-                <div className="min-h-screen">
-                    <nav className="fixed top-0 w-full z-50 glass-panel h-16 px-4 flex items-center justify-between border-b border-purple-500/20">
-                        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('feed')}>
-                            <div className="bg-purple-600 p-1.5 rounded-lg"><Icon name="Gamepad2" className="text-white" /></div>
-                            <span className="font-orbitron font-bold text-xl uppercase tracking-tighter">PANGZUR <span className="text-purple-500">HUB</span></span>
-                        </div>
-                        <div className="flex items-center gap-6">
-                            <button onClick={() => setView('feed')} className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors">Intel</button>
-                            {isAdmin ? 
-                                <button onClick={() => setView('admin')} className="text-xs font-bold uppercase text-purple-400">Admin</button> :
-                                <button onClick={() => setView('login')} className="text-gray-400 hover:text-white"><Icon name="UserCircle" size={24} /></button>
-                            }
-                        </div>
-                    </nav>
-
-                    <main className="pt-24 pb-12 max-w-6xl mx-auto px-4">
-                        {view === 'feed' && (
-                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                                <div className="lg:col-span-8 space-y-8">
-                                    <AdSlot id="top" ads={ads} className="h-24" />
-                                    <h2 className="text-xs font-black uppercase tracking-[0.3em] border-l-4 border-pink-500 pl-4">Latest Intel Transmissions</h2>
-                                    {posts.map(post => (
-                                        <div key={post.id} className="glass-panel rounded-2xl overflow-hidden cursor-pointer group" onClick={() => { setSelectedPost(post); setView('article'); }}>
-                                            <div className="h-56 bg-black overflow-hidden">
-                                                <img src={post.mediaUrl} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700" />
-                                            </div>
-                                            <div className="p-6">
-                                                <span className="text-[10px] text-pink-500 font-bold uppercase mb-2 block tracking-widest">{post.type}</span>
-                                                <h3 className="text-2xl font-bold uppercase group-hover:text-purple-400">{post.title}</h3>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <aside className="lg:col-span-4 space-y-6">
-                                    <div className="glass-panel p-6 rounded-2xl">
-                                        <h3 className="text-[10px] font-black uppercase text-purple-500 tracking-widest mb-4 flex items-center gap-2"><Icon name="TrendingUp" size={14} /> Meta Pulse</h3>
-                                        <div className="space-y-4 text-sm text-gray-400">
-                                            <p className="hover:text-pink-500 cursor-pointer transition-colors">Best Skill Builds v3.4</p>
-                                            <p className="hover:text-pink-500 cursor-pointer transition-colors">Secret Managers Guide</p>
-                                        </div>
-                                    </div>
-                                    <AdSlot id="side" ads={ads} className="h-64" />
-                                </aside>
-                            </div>
-                        )}
-
-                        {view === 'article' && selectedPost && (
-                            <div className="max-w-3xl mx-auto space-y-6">
-                                <button onClick={() => setView('feed')} className="text-xs font-bold text-purple-400 uppercase tracking-widest flex items-center gap-1">
-                                    <Icon name="ChevronRight" size={14} className="rotate-180" /> Back to Intelligence
-                                </button>
-                                <h1 className="text-4xl font-black uppercase leading-tight">{selectedPost.title}</h1>
-                                <img src={selectedPost.mediaUrl} className="w-full rounded-2xl border border-white/10" />
-                                {selectedPost.players && selectedPost.players.length > 0 && (
-                                    <div className="p-6 glass-panel rounded-2xl">
-                                        <h4 className="text-[10px] font-bold uppercase text-purple-400 mb-4 tracking-widest">Tactical Blueprint</h4>
-                                        <FormationGrid players={selectedPost.players} />
-                                    </div>
-                                )}
-                                <p className="text-gray-300 text-lg leading-relaxed whitespace-pre-wrap">{selectedPost.content}</p>
-                            </div>
-                        )}
-
-                        {view === 'login' && (
-                            <div className="max-w-sm mx-auto pt-20 flex flex-col items-center">
-                                <h2 className="font-orbitron text-xl font-bold mb-6">ADMIN AUTH</h2>
-                                <input type="password" value={adminPass} onChange={e => setAdminPass(e.target.value)} className="w-full bg-black border border-purple-500/30 rounded-xl p-4 text-center mb-4 outline-none focus:border-pink-500 font-mono tracking-widest" placeholder="ACCESS KEY" />
-                                <button onClick={login} className="w-full bg-purple-600 py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-pink-600 transition-colors">Verify Credentials</button>
-                            </div>
-                        )}
-
-                        {view === 'admin' && isAdmin && (
-                            <div className="max-w-2xl mx-auto space-y-8">
-                                <h2 className="text-2xl font-black uppercase border-b border-white/10 pb-4">Command Center</h2>
-                                <div className="glass-panel p-8 rounded-2xl space-y-6">
-                                    <input placeholder="Post Title" value={newPost.title} onChange={e => setNewPost({...newPost, title: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg p-3" />
-                                    <input placeholder="Image URL" value={newPost.mediaUrl} onChange={e => setNewPost({...newPost, mediaUrl: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg p-3" />
-                                    <textarea placeholder="Intel Details" value={newPost.content} onChange={e => setNewPost({...newPost, content: e.target.value})} rows={6} className="w-full bg-black border border-white/10 rounded-lg p-3"></textarea>
-                                    
-                                    <div className="border border-purple-500/20 p-4 rounded-xl space-y-4">
-                                        <p className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">Add Tactical Position</p>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <input placeholder="Name" value={tempPos.name} onChange={e => setTempPos({...tempPos, name: e.target.value})} className="bg-black border border-white/10 rounded p-2 text-xs" />
-                                            <select value={tempPos.pos} onChange={e => setTempPos({...tempPos, pos: e.target.value})} className="bg-black border border-white/10 rounded p-2 text-xs">
-                                                {['GK','CB','LB','RB','DMF','CMF','AMF','LWF','RWF','CF','SS'].map(z => <option key={z}>{z}</option>)}
-                                            </select>
-                                            <input type="number" placeholder="X %" value={tempPos.x} onChange={e => setTempPos({...tempPos, x: Number(e.target.value)})} className="bg-black border border-white/10 rounded p-2 text-xs" />
-                                            <input type="number" placeholder="Y %" value={tempPos.y} onChange={e => setTempPos({...tempPos, y: Number(e.target.value)})} className="bg-black border border-white/10 rounded p-2 text-xs" />
-                                        </div>
-                                        <button onClick={() => { if(newPost.players.length < 11) setNewPost({...newPost, players: [...newPost.players, tempPos]}); setTempPos({...tempPos, name: ''}); }} className="w-full py-2 bg-purple-900/40 text-[10px] font-bold uppercase tracking-widest border border-purple-500/20 rounded">Add Player</button>
-                                    </div>
-
-                                    <button onClick={publishPost} className="w-full bg-purple-600 py-4 rounded-xl font-black uppercase tracking-[0.2em] hover:bg-pink-600 transition-colors">Publish Transmission</button>
-                                </div>
-                            </div>
-                        )}
-                    </main>
+    <!-- Hero Section -->
+    <header id="home" class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <span class="badge neon-border-crimson">LEAGUE TITLE</span>
+            <h1 class="main-title">IAMBOT LEAGUE</h1>
+            <h2 class="sub-title neon-text-pink">(FREE EDITION)</h2>
+            <p class="hero-tagline">Enter the ultimate eFootball battleground. Prove your dominance.</p>
+            
+            <!-- Countdown Timer -->
+            <div class="countdown-container">
+                <h3>TOURNAMENT BEGINS IN</h3>
+                <div id="countdown">
+                    <div class="time-box"><span id="days">00</span><p>Days</p></div>
+                    <div class="time-box"><span id="hours">00</span><p>Hours</p></div>
+                    <div class="time-box"><span id="minutes">00</span><p>Mins</p></div>
+                    <div class="time-box"><span id="seconds">00</span><p>Secs</p></div>
                 </div>
-            );
-        }
+            </div>
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+            <!-- Registration Status Banner -->
+            <div class="status-banner">
+                Status: <span id="reg-status" class="status-open">REGISTRATION OPEN</span>
+            </div>
+            
+            <a href="#register" class="btn btn-neon-pink glow-effect">REGISTER NOW</a>
+        </div>
+    </header>
+
+    <!-- Stats Dashboard Counter -->
+    <section class="quick-stats">
+        <div class="stat-card">
+            <i class="fa-solid fa-users neon-text-purple"></i>
+            <h3 id="total-registered-count">0</h3>
+            <p>Verified Competitors</p>
+        </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <main class="container">
+
+        <!-- Registration Section -->
+        <section id="register" class="section-card neon-border-purple">
+            <h2 class="section-title"><i class="fa-solid fa-gamepad"></i> SECURE YOUR SLOT</h2>
+            <p class="section-subtitle">Fill out your submission details. Registrations require manual admin approval.</p>
+            
+            <form id="registration-form" class="gaming-form">
+                <div class="form-group">
+                    <label for="efootball-username"><i class="fa-solid fa-user-tag"></i> eFootball Username</label>
+                    <input type="text" id="efootball-username" placeholder="Exact Mobile/Console Name" required>
+                </div>
+                <div class="form-group">
+                    <label for="whatsapp-number"><i class="fa-brands fa-whatsapp"></i> WhatsApp Number</label>
+                    <input type="tel" id="whatsapp-number" placeholder="Include Country Code (e.g., +234...)" required>
+                </div>
+                <div class="form-group">
+                    <label for="current-division"><i class="fa-solid fa-trophy"></i> Current Division</label>
+                    <select id="current-division" required>
+                        <option value="" disabled selected>Select your current league tier</option>
+                        <option value="Division 1">Division 1</option>
+                        <option value="Division 2">Division 2</option>
+                        <option value="Division 3">Division 3</option>
+                        <option value="Division 4">Division 4</option>
+                        <option value="Division 5+">Division 5 or lower</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-neon-purple full-width">SUBMIT REGISTRATION</button>
+            </form>
+        </section>
+
+        <!-- Registered Players Section -->
+        <section id="players" class="section-card no-bg">
+            <h2 class="section-title text-center">OFFICIAL REGISTERED PLAYERS</h2>
+            
+            <!-- Search Control -->
+            <div class="search-wrapper">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="player-search" placeholder="Search registered players...">
+            </div>
+
+            <!-- Player Grid Display Container -->
+            <div class="player-grid" id="player-grid-container">
+                <!-- Dynamic Content Insertion via script.js -->
+            </div>
+        </section>
+
+        <!-- Media & Tournament Updates Section -->
+        <section id="media" class="section-card neon-border-crimson">
+            <h2 class="section-title"><i class="fa-solid fa-photo-film"></i> TOURNAMENT HQ & MEDIA</h2>
+            <p class="section-subtitle">Official league standings, match graphics, and schedules directly from management.</p>
+            
+            <div class="media-grid" id="media-display-grid">
+                <!-- Fallback standard placeholders if database is empty -->
+                <div class="media-card">
+                    <h4>LEAGUE TABLE STANDINGS</h4>
+                    <div class="media-placeholder">
+                        <i class="fa-solid fa-table-list placeholder-icon"></i>
+                        <p>No tournament standings published yet.</p>
+                    </div>
+                </div>
+                <div class="media-card">
+                    <h4>MATCH RESULTS GRAPHIC</h4>
+                    <div class="media-placeholder">
+                        <i class="fa-solid fa-chart-simple placeholder-icon"></i>
+                        <p>No match cards uploaded yet.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Community Chat Section -->
+        <section id="community" class="section-card neon-border-pink">
+            <h2 class="section-title"><i class="fa-solid fa-comments"></i> COMMUNITY FEED</h2>
+            <p class="section-subtitle">Drop trash talk, strategies, or banter here. Keep it competitive!</p>
+            
+            <div class="chat-box">
+                <div class="chat-messages" id="chat-messages-container">
+                    <!-- Dynamic Comments Hook -->
+                </div>
+                <form id="comment-form" class="chat-input-area">
+                    <input type="text" id="comment-username" placeholder="Your Alias" required maxlength="20">
+                    <input type="text" id="comment-text" placeholder="Type an update or comment..." required maxlength="250">
+                    <button type="submit" class="btn-send"><i class="fa-solid fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Protected Dynamic Hidden Administration Portal Area -->
+        <section id="admin-dashboard" class="section-card neon-border-admin hidden">
+            <div class="admin-header">
+                <h2><i class="fa-solid fa-screwdriver-wrench"></i> CONTROL PANEL (ADMIN)</h2>
+                <button id="admin-logout-btn" class="btn btn-outline-crimson btn-sm">Exit Portal</button>
+            </div>
+
+            <div class="admin-grid">
+                <!-- Registration Validation Module -->
+                <div class="admin-card text-left">
+                    <h3>Pending Applications</h3>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>WhatsApp</th>
+                                    <th>Division</th>
+                                    <th>Action Matrix</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-pending-table-body">
+                                <!-- Dynamic approvals hook -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Global Management Module -->
+                <div class="admin-card text-left">
+                    <h3>All Players Directory</h3>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-all-players-body">
+                                <!-- Quick deletion hook -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Live Media & Platform Assets Content Injection Interface -->
+                <div class="admin-card text-left">
+                    <h3>Asset Graphics Manager</h3>
+                    <form id="admin-media-form" class="gaming-form inline-form">
+                        <div class="form-group">
+                            <label for="media-type-select">Asset Target Slot</label>
+                            <select id="media-type-select" required>
+                                <option value="League Standings Table">League Table Standings</option>
+                                <option value="Match Day Results Grid">Match Day Results</option>
+                                <option value="General Announcement Info">General Announcement Banner</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="media-url-input">Image URL Address</label>
+                            <input type="url" id="media-url-input" placeholder="https://imgur.com/example.png" required>
+                        </div>
+                        <button type="submit" class="btn btn-neon-pink">Push Media Asset</button>
+                    </form>
+                    <div id="admin-media-list" class="admin-media-managed-list">
+                         <!-- Admin managed asset items list dynamic rendering -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Summary Information -->
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 <span class="neon-text-pink">IAMBOT HUB</span>. All Rights Reserved. Not affiliated with Konami Digital Entertainment.</p>
+            <div class="footer-socials">
+                <a href="#" target="_blank" aria-label="WhatsApp Group Link"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="#" target="_blank" aria-label="YouTube Channel Link"><i class="fa-brands fa-youtube"></i></a>
+                <a href="#" target="_blank" aria-label="Discord Server Link"><i class="fa-brands fa-discord"></i></a>
+                <a href="#" target="_blank" aria-label="Twitter Profile Link"><i class="fa-brands fa-x-twitter"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDK Architecture Import Scripts (Using v9 Compat Library Layers) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- core dynamic execution controller script script.js -->
+    <script src="script.js"></script>
 </body>
-  </html>
+</html>
+
