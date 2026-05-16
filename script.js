@@ -1,13 +1,38 @@
 // ==========================================
-// 1. EASY FORM CONFIGURATION (NO DATABASE)
+// 1. MASTER CLOUD CONFIGURATION (SHARED)
 // ==========================================
-// Go to formsubmit.co, enter your email, and put the link they give you here.
-// For now, it will use a secure dummy endpoint.
-const FORM_ENDPOINT = "https://formsubmit.co/apangzur@gmail.com"; 
+// Using a free, instant public bin for tournament data sync
+const BIN_URL = "https://kvdb.io/MN86yqV8B59A7qXpE7unZp/iambot_league_v1";
 
-// Local storage keys to keep track of approved players locally
-let officialPlayers = JSON.parse(localStorage.getItem('approved_players')) || [];
-let pendingPlayers = JSON.parse(localStorage.getItem('pending_players')) || [];
+let officialPlayers = [];
+let pendingPlayers = [];
+
+// Fetch master data from cloud on load
+async function syncFromCloud() {
+    try {
+        const response = await fetch(BIN_URL);
+        if (response.ok) {
+            const data = await response.json();
+            officialPlayers = data.official || [];
+            pendingPlayers = data.pending || [];
+        }
+    } catch (e) {
+        console.log("Initial fetch empty, starting fresh database node.");
+    }
+    renderPublicVerifiedPlayersGrid();
+    renderAdminControlPanels();
+}
+
+async function saveToCloud() {
+    try {
+        await fetch(BIN_URL, {
+            method: 'POST',
+            body: JSON.stringify({ official: officialPlayers, pending: pendingPlayers })
+        });
+    } catch (e) {
+        alert("Cloud sync failed. Check internet connection.");
+    }
+}
 
 // ==========================================
 // 2. RUNTIME LOADER & UI NAV MANAGEMENT
@@ -20,9 +45,10 @@ window.addEventListener('load', () => {
     }, 600);
     initializeCountdown(new Date().getTime() + (7 * 24 * 60 * 60 * 1000));
     
-    // Initial UI render from storage
-    renderPublicVerifiedPlayersGrid();
-    renderAdminControlPanels();
+    // Load live cloud data
+    syncFromCloud();
+    // Auto-refresh data every 15 seconds so you see new signups live
+    setInterval(syncFromCloud, 15000);
 });
 
 // Responsive Burger Dropdown Controller
@@ -74,7 +100,7 @@ function initializeCountdown(targetTimestamp) {
 // ==========================================
 // 4. PUBLIC APPLICATION REGISTRATION MODULE
 // ==========================================
-document.getElementById('registration-form').addEventListener('submit', function(e) {
+document.getElementById('registration-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const username = document.getElementById('efootball-username').value.trim();
@@ -83,13 +109,15 @@ document.getElementById('registration-form').addEventListener('submit', function
 
     if (!username || !whatsapp || !division) return alert("Please fill all fields.");
 
-    // Check duplicates
+    // Refresh local lists before checking duplicate
+    await syncFromCloud();
+
     const isDuplicate = officialPlayers.concat(pendingPlayers).some(player => 
         player.username.toLowerCase() === username.toLowerCase()
     );
 
     if (isDuplicate) {
-        alert("Error: This username is already filed or registered!");
+        alert("Error: This username is already registered!");
         return;
     }
 
@@ -101,21 +129,8 @@ document.getElementById('registration-form').addEventListener('submit', function
         status: "Pending Approval"
     };
 
-    // Save to local pending storage cache
     pendingPlayers.push(newPlayer);
-    localStorage.setItem('pending_players', JSON.stringify(pendingPlayers));
-
-    // OPTIONAL: Send a copy straight to email using a simple background fetch request
-    fetch(FORM_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify({
-            Tournament: "IAMBOT LEAGUE",
-            Username: username,
-            WhatsApp: whatsapp,
-            Division: division
-        })
-    }).catch(err => console.log("Email fallback skip setup"));
+    await saveToCloud();
 
     alert("Registration Received!\nStatus: Pending Admin approval validation.");
     document.getElementById('registration-form').reset();
@@ -160,7 +175,7 @@ document.getElementById('player-search').addEventListener('input', function(e) {
     });
 });
 
-// Mock Chat Banter system fallback to keep dashboard lively
+// Banter Box Fallback
 document.getElementById('comment-form').addEventListener('submit', function(e) {
     e.preventDefault();
     const nameInput = document.getElementById('comment-username');
@@ -184,7 +199,7 @@ document.getElementById('comment-form').addEventListener('submit', function(e) {
 // ==========================================
 // 6. ADMIN MODERATION ACTIONS PANEL
 // ==========================================
-const adminPasswordHashKey = "IAMBOTADMIN2026"; 
+const adminPasswordHashKey = "IAMBOT_ADMIN_2026"; 
 
 document.getElementById('admin-login-btn').addEventListener('click', () => {
     const token = prompt("Provide Hub Dashboard Security Credentials:");
@@ -205,6 +220,8 @@ document.getElementById('admin-logout-btn').addEventListener('click', () => {
 function renderAdminControlPanels() {
     const pendingBody = document.getElementById('admin-pending-table-body');
     const allBody = document.getElementById('admin-all-players-body');
+    
+    if(!pendingBody || !allBody) return;
     
     pendingBody.innerHTML = '';
     allBody.innerHTML = '';
@@ -236,32 +253,30 @@ function renderAdminControlPanels() {
     });
 }
 
-window.approvePlayer = function(id) {
+window.approvePlayer = async function(id) {
     const index = pendingPlayers.findIndex(p => p.id === id);
     if (index > -1) {
         const player = pendingPlayers.splice(index, 1)[0];
         player.status = "Approved";
         officialPlayers.push(player);
         
-        localStorage.setItem('pending_players', JSON.stringify(pendingPlayers));
-        localStorage.setItem('approved_players', JSON.stringify(officialPlayers));
-        
+        await saveToCloud();
         renderPublicVerifiedPlayersGrid();
         renderAdminControlPanels();
-        alert("Player Approved!");
+        alert("Player Approved Globally!");
     }
 };
 
-window.deletePending = function(id) {
+window.deletePending = async function(id) {
     pendingPlayers = pendingPlayers.filter(p => p.id !== id);
-    localStorage.setItem('pending_players', JSON.stringify(pendingPlayers));
+    await saveToCloud();
     renderAdminControlPanels();
 };
 
-window.deleteOfficial = function(id) {
+window.deleteOfficial = async function(id) {
     if (confirm("Remove player permanently?")) {
         officialPlayers = officialPlayers.filter(p => p.id !== id);
-        localStorage.setItem('approved_players', JSON.stringify(officialPlayers));
+        await saveToCloud();
         renderPublicVerifiedPlayersGrid();
         renderAdminControlPanels();
     }
@@ -271,4 +286,5 @@ function escapeHTML(str) {
     if (!str) return '';
     return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
 }
+
 
