@@ -1,28 +1,13 @@
 // ==========================================
-// 1. FIREBASE CONFIGURATION SETUP INITIALIZER
+// 1. EASY FORM CONFIGURATION (NO DATABASE)
 // ==========================================
-// Your live, verified Firebase project credentials
-const firebaseConfig = {
-    apiKey: "AIzaSyAakHKECzXnsxmvofA-seaQE8Xjfqwd6D0",
-    authDomain: "iambot-hub.firebaseapp.com",
-    databaseURL: "https://iambot-hub-default-rtdb.firebaseio.com",
-    projectId: "iambot-hub",
-    storageBucket: "iambot-hub.firebasestorage.app",
-    messagingSenderId: "897462850468",
-    appId: "1:897462850468:web:904bcdabbf0f64f2682731"
-};
+// Go to formsubmit.co, enter your email, and put the link they give you here.
+// For now, it will use a secure dummy endpoint.
+const FORM_ENDPOINT = "https://formsubmit.co/apangzur@gmail.com"; 
 
-// Initialize app compatibility layers instance
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-
-// Setup references endpoints
-const registrationsRef = database.ref('registrations');
-const commentsRef = database.ref('comments');
-const mediaRef = database.ref('media');
-
-// Local Global Dynamic Operational Cache State Arrays
-let cachedRegistrations = {};
+// Local storage keys to keep track of approved players locally
+let officialPlayers = JSON.parse(localStorage.getItem('approved_players')) || [];
+let pendingPlayers = JSON.parse(localStorage.getItem('pending_players')) || [];
 
 // ==========================================
 // 2. RUNTIME LOADER & UI NAV MANAGEMENT
@@ -33,7 +18,11 @@ window.addEventListener('load', () => {
         loader.style.opacity = '0';
         loader.style.visibility = 'hidden';
     }, 600);
-    initializeCountdown(new Date().getTime() + (7 * 24 * 60 * 60 * 1000)); // Default 7 days forward
+    initializeCountdown(new Date().getTime() + (7 * 24 * 60 * 60 * 1000));
+    
+    // Initial UI render from storage
+    renderPublicVerifiedPlayersGrid();
+    renderAdminControlPanels();
 });
 
 // Responsive Burger Dropdown Controller
@@ -92,60 +81,62 @@ document.getElementById('registration-form').addEventListener('submit', function
     const whatsapp = document.getElementById('whatsapp-number').value.trim();
     const division = document.getElementById('current-division').value;
 
-    if (!username || !whatsapp || !division) return alert("Please fill all inputs.");
+    if (!username || !whatsapp || !division) return alert("Please fill all fields.");
 
-    // Validation Check: Prevent duplicates based on user lookup matching keys
-    const isDuplicate = Object.values(cachedRegistrations).some(player => 
+    // Check duplicates
+    const isDuplicate = officialPlayers.concat(pendingPlayers).some(player => 
         player.username.toLowerCase() === username.toLowerCase()
     );
 
     if (isDuplicate) {
-        alert("Error: This eFootball username is already filed or officially registered!");
+        alert("Error: This username is already filed or registered!");
         return;
     }
 
-    // Push new entry record node securely onto database reference stream
-    registrationsRef.push({
+    const newPlayer = {
+        id: Date.now().toString(),
         username: username,
         whatsapp: whatsapp,
         division: division,
-        status: "Pending Approval",
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-    }).then(() => {
-        alert("Registration Submission Received!\nStatus: Pending Admin approval validation before card creation.");
-        document.getElementById('registration-form').reset();
-    }).catch(err => {
-        console.error(err);
-        alert("Database execution error. Verify connection profiles configurations.");
-    });
+        status: "Pending Approval"
+    };
+
+    // Save to local pending storage cache
+    pendingPlayers.push(newPlayer);
+    localStorage.setItem('pending_players', JSON.stringify(pendingPlayers));
+
+    // OPTIONAL: Send a copy straight to email using a simple background fetch request
+    fetch(FORM_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+            Tournament: "IAMBOT LEAGUE",
+            Username: username,
+            WhatsApp: whatsapp,
+            Division: division
+        })
+    }).catch(err => console.log("Email fallback skip setup"));
+
+    alert("Registration Received!\nStatus: Pending Admin approval validation.");
+    document.getElementById('registration-form').reset();
+    renderAdminControlPanels();
 });
 
 // ==========================================
-// 5. DATA FETCH LISTENERS & UI RENDERING
+// 5. RENDERING ELEMENTS INTERFACE
 // ==========================================
-
-// Handle Realtime Changes to Player Registrations Directory
-registrationsRef.on('value', snapshot => {
-    const data = snapshot.val() || {};
-    cachedRegistrations = data; // Update local memory structure cache instance
-    
-    renderPublicVerifiedPlayersGrid(data);
-    renderAdminControlPanels(data);
-});
-
-function renderPublicVerifiedPlayersGrid(playersObj) {
+function renderPublicVerifiedPlayersGrid() {
     const container = document.getElementById('player-grid-container');
-    container.innerHTML = ''; // Wipe frame view clean
+    container.innerHTML = '';
     
-    const verifiedPlayers = Object.values(playersObj).filter(p => p.status === "Approved");
-    document.getElementById('total-registered-count').innerText = verifiedPlayers.length;
+    document.getElementById('total-registered-count').innerText = officialPlayers.length;
 
-    if (verifiedPlayers.length === 0) {
-        container.innerHTML = `<div class="no-players-fallback">No fighters approved yet. Be the first to secure a grid placement slot!</div>`;
+    if (officialPlayers.length === 0) {
+        container.innerHTML = `<div class="no-players-fallback">No fighters approved yet. Be the first to secure a slot!</div>`;
         return;
     }
 
-    verifiedPlayers.forEach(player => {
+    officialPlayers.forEach(player => {
         const card = document.createElement('div');
         card.className = 'player-card';
         card.innerHTML = `
@@ -159,103 +150,50 @@ function renderPublicVerifiedPlayersGrid(playersObj) {
     });
 }
 
-// Public Interactive Search Realtime Filtration Input Mechanism
+// Live Search Filter
 document.getElementById('player-search').addEventListener('input', function(e) {
     const query = e.target.value.toLowerCase();
     const cards = document.querySelectorAll('#player-grid-container .player-card');
-    
     cards.forEach(card => {
         const name = card.querySelector('h4').innerText.toLowerCase();
         card.style.display = name.includes(query) ? 'flex' : 'none';
     });
 });
 
-// ==========================================
-// 6. LIVE COMMUNITY BANTER FEED SYSTEM
-// ==========================================
+// Mock Chat Banter system fallback to keep dashboard lively
 document.getElementById('comment-form').addEventListener('submit', function(e) {
     e.preventDefault();
     const nameInput = document.getElementById('comment-username');
     const textInput = document.getElementById('comment-text');
-
-    commentsRef.push({
-        user: nameInput.value.trim(),
-        text: textInput.value.trim(),
-        time: firebase.database.ServerValue.TIMESTAMP
-    });
-    textInput.value = ''; // Clean prompt space
-});
-
-commentsRef.limitToLast(40).on('value', snapshot => {
     const container = document.getElementById('chat-messages-container');
-    container.innerHTML = '';
-    
-    snapshot.forEach(child => {
-        const msg = child.val();
-        const dateStr = msg.time ? new Date(msg.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-        
-        const bubble = document.createElement('div');
-        bubble.className = 'chat-msg';
-        bubble.innerHTML = `
-            <div class="chat-msg-header">
-                <span class="chat-user">${escapeHTML(msg.user)}</span>
-                <span class="chat-time">${dateStr}</span>
-            </div>
-            <div class="chat-text">${escapeHTML(msg.text)}</div>
-        `;
-        container.appendChild(bubble);
-    });
-    container.scrollTop = container.scrollHeight; // Auto anchor base focus down
+
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-msg';
+    bubble.innerHTML = `
+        <div class="chat-msg-header">
+            <span class="chat-user">${escapeHTML(nameInput.value)}</span>
+            <span class="chat-time">Just Now</span>
+        </div>
+        <div class="chat-text">${escapeHTML(textInput.value)}</div>
+    `;
+    container.appendChild(bubble);
+    textInput.value = '';
+    container.scrollTop = container.scrollHeight;
 });
 
 // ==========================================
-// 7. TOURNAMENT MEDIA HQ DISPLAY LOADER
+// 6. ADMIN MODERATION ACTIONS PANEL
 // ==========================================
-mediaRef.on('value', snapshot => {
-    const grid = document.getElementById('media-display-grid');
-    const adminMediaList = document.getElementById('admin-media-list');
-    const data = snapshot.val() || {};
-    
-    adminMediaList.innerHTML = '';
-    
-    if (Object.keys(data).length > 0) {
-        grid.innerHTML = ''; // Wipe fallback defaults
-        
-        Object.entries(data).forEach(([key, asset]) => {
-            // Render to Public Section Display Layout Frame Matrix Base Grid Layout Card
-            const card = document.createElement('div');
-            card.className = 'media-card';
-            card.innerHTML = `
-                <h4>${escapeHTML(asset.type)}</h4>
-                <img src="${encodeURI(asset.url)}" class="media-img-frame" alt="Tournament Graphic Asset" onerror="this.parentElement.innerHTML='<p style=\'color:red\'>Failed to load media layout link address element asset target.</p>'">
-            `;
-            grid.appendChild(card);
-
-            // Render Control Operations Tracker Inside Managed Elements Viewport Component
-            const managedItem = document.createElement('div');
-            managedItem.className = 'managed-media-item';
-            managedItem.innerHTML = `
-                <span>${escapeHTML(asset.type)}</span>
-                <button onclick="deleteMediaAsset('${key}')" class="btn-action btn-reject">Drop</button>
-            `;
-            adminMediaList.innerHTML += managedItem.outerHTML;
-        });
-    }
-});
-
-// ==========================================
-// 8. SECURITY MODERATION ACCESS CONTROLS (ADMIN)
-// ==========================================
-const adminPasswordHashKey = "IAMBOT_ADMIN_2026"; // Your access password bypass token string literal
+const adminPasswordHashKey = "IAMBOTADMIN2026"; 
 
 document.getElementById('admin-login-btn').addEventListener('click', () => {
     const token = prompt("Provide Hub Dashboard Security Credentials:");
     if (token === adminPasswordHashKey) {
         document.getElementById('admin-dashboard').classList.remove('hidden');
         document.getElementById('admin-dashboard').scrollIntoView();
-        alert("Credentials Verified. Operational Grid Synchronized.");
+        alert("Credentials Verified.");
     } else if (token !== null) {
-        alert("Access Refused: Signature Identification Mismatch.");
+        alert("Access Refused.");
     }
 });
 
@@ -264,78 +202,73 @@ document.getElementById('admin-logout-btn').addEventListener('click', () => {
     window.scrollTo(0,0);
 });
 
-function renderAdminControlPanels(playersObj) {
+function renderAdminControlPanels() {
     const pendingBody = document.getElementById('admin-pending-table-body');
     const allBody = document.getElementById('admin-all-players-body');
     
     pendingBody.innerHTML = '';
     allBody.innerHTML = '';
 
-    Object.entries(playersObj).forEach(([id, player]) => {
-        if (player.status === "Pending Approval") {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong>${escapeHTML(player.username)}</strong></td>
-                <td><a href="https://wa.me/${player.whatsapp.replace(/\D/g,'')}" target="_blank" style="color:#00ff66; text-decoration:none;"><i class="fa-brands fa-whatsapp"></i> Chat</a></td>
-                <td>${escapeHTML(player.division)}</td>
-                <td>
-                    <div class="action-btn-group">
-                        <button onclick="updatePlayerStatus('${id}', 'Approved')" class="btn-action btn-approve">Pass</button>
-                        <button onclick="removePlayerEntry('${id}')" class="btn-action btn-reject">Deny</button>
-                    </div>
-                </td>
-            `;
-            pendingBody.appendChild(tr);
-        }
+    pendingPlayers.forEach(player => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${escapeHTML(player.username)}</strong></td>
+            <td><a href="https://wa.me/${player.whatsapp.replace(/\D/g,'')}" target="_blank" style="color:#00ff66;"><i class="fa-brands fa-whatsapp"></i> Chat</a></td>
+            <td>${escapeHTML(player.division)}</td>
+            <td>
+                <div class="action-btn-group">
+                    <button onclick="approvePlayer('${player.id}')" class="btn-action btn-approve">Pass</button>
+                    <button onclick="deletePending('${player.id}')" class="btn-action btn-reject">Deny</button>
+                </div>
+            </td>
+        `;
+        pendingBody.appendChild(tr);
+    });
 
-        // Output all registers tracking list array rows
+    officialPlayers.forEach(player => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${escapeHTML(player.username)}</td>
-            <td style="color:${player.status === 'Approved' ? '#00ff66' : '#ff9900'}">${player.status}</td>
-            <td><button onclick="removePlayerEntry('${id}')" class="btn-action btn-reject"><i class="fa-solid fa-trash"></i></button></td>
+            <td style="color:#00ff66">Approved</td>
+            <td><button onclick="deleteOfficial('${player.id}')" class="btn-action btn-reject"><i class="fa-solid fa-trash"></i></button></td>
         `;
         allBody.appendChild(row);
     });
 }
 
-// Action Handlers
-window.updatePlayerStatus = function(id, status) {
-    registrationsRef.child(id).update({ status: status })
-        .then(() => alert("Profile Credentials Context Mutated Successfully."))
-        .catch(err => alert("Operation Refused: " + err.message));
-};
-
-window.removePlayerEntry = function(id) {
-    if (confirm("Confirm permanent records modification purge context operations command execution parameters?")) {
-        registrationsRef.child(id).remove()
-            .then(() => alert("Selected Identity Index Erased from Storage Tree Matrix Grid System."));
+window.approvePlayer = function(id) {
+    const index = pendingPlayers.findIndex(p => p.id === id);
+    if (index > -1) {
+        const player = pendingPlayers.splice(index, 1)[0];
+        player.status = "Approved";
+        officialPlayers.push(player);
+        
+        localStorage.setItem('pending_players', JSON.stringify(pendingPlayers));
+        localStorage.setItem('approved_players', JSON.stringify(officialPlayers));
+        
+        renderPublicVerifiedPlayersGrid();
+        renderAdminControlPanels();
+        alert("Player Approved!");
     }
 };
 
-// Handle Image Push Updates
-document.getElementById('admin-media-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const type = document.getElementById('media-type-select').value;
-    const url = document.getElementById('media-url-input').value.trim();
+window.deletePending = function(id) {
+    pendingPlayers = pendingPlayers.filter(p => p.id !== id);
+    localStorage.setItem('pending_players', JSON.stringify(pendingPlayers));
+    renderAdminControlPanels();
+};
 
-    mediaRef.push({ type: type, url: url }).then(() => {
-        alert("Media Asset Track Generated and Synchronized.");
-        document.getElementById('admin-media-form').reset();
-    });
-});
-
-window.deleteMediaAsset = function(key) {
-    if (confirm("Evict this media asset element out from the public gallery space?")) {
-        mediaRef.child(key).remove();
+window.deleteOfficial = function(id) {
+    if (confirm("Remove player permanently?")) {
+        officialPlayers = officialPlayers.filter(p => p.id !== id);
+        localStorage.setItem('approved_players', JSON.stringify(officialPlayers));
+        renderPublicVerifiedPlayersGrid();
+        renderAdminControlPanels();
     }
 };
 
-// Security Text Sanitization Utility Hook
 function escapeHTML(str) {
     if (!str) return '';
-    return str.replace(/[&<>'"]/g, 
-        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-    );
+    return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
 }
 
