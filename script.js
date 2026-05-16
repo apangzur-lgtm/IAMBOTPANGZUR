@@ -1,15 +1,15 @@
 // ==========================================
 // 1. FIREBASE CONFIGURATION SETUP INITIALIZER
 // ==========================================
-// Replace these placeholders with your actual web project config values from your Firebase console
+// Your live, verified Firebase project credentials
 const firebaseConfig = {
-    apiKey: "AIzaSyYourActualApiKeyHere_ClickPasteFromConsole",
+    apiKey: "AIzaSyAakHKECzXnsxmvofA-seaQE8Xjfqwd6D0",
     authDomain: "iambot-hub.firebaseapp.com",
     databaseURL: "https://iambot-hub-default-rtdb.firebaseio.com",
     projectId: "iambot-hub",
-    storageBucket: "iambot-hub.appspot.com",
-    messagingSenderId: "123456789012",
-    appId: "1:123456789012:web:abcdef123456"
+    storageBucket: "iambot-hub.firebasestorage.app",
+    messagingSenderId: "897462850468",
+    appId: "1:897462850468:web:904bcdabbf0f64f2682731"
 };
 
 // Initialize app compatibility layers instance
@@ -246,7 +246,7 @@ mediaRef.on('value', snapshot => {
 // ==========================================
 // 8. SECURITY MODERATION ACCESS CONTROLS (ADMIN)
 // ==========================================
-const adminPasswordHashKey = "IAMBOT_ADMIN_2026"; // Change this to your preferred access password bypass token string literal
+const adminPasswordHashKey = "IAMBOT_ADMIN_2026"; // Your access password bypass token string literal
 
 document.getElementById('admin-login-btn').addEventListener('click', () => {
     const token = prompt("Provide Hub Dashboard Security Credentials:");
@@ -338,3 +338,4 @@ function escapeHTML(str) {
         tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
     );
 }
+
